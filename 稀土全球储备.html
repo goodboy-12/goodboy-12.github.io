@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图表联动示例</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: rgba(51,51,51,1);
+        }
+
+        #main {
+            width: 100%;
+            height: 100vh;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="main"></div>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+    <script>
+        // 监听窗口大小变化，调整图表尺寸
+        window.addEventListener('resize', function() {
+            if (myChart) {
+                myChart.resize();
+            }
+        });
+
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        var option;
+
+        // 定义系列颜色
+        var seriesColors = ["#dd6b66", "#759aa0", "#e69d87", "#8dc1a9", "#ea7e53", "#eedd78", "#73a373", "#73b9bc", "#7289ab", "#91ca8c", "#f49f42"];
+
+        // 准备数据
+        var lineData = [
+            ['country', '2020', '2021', '2022', '2023', '2024'],
+            ['中国', 16.8, 16.8, 21.0, 24.0, 27.0],
+            ['美国', 4.3, 4.3, 4.3, 4.16, 4.5],
+            ['缅甸', 2.6, 2.6, 1.2, 4.3, 3.1],
+            ['澳大利亚', 2.2, 2.2, 1.8, 1.3, 1.3],
+            ['印度', 0.29, 0.29, 0.29, 0.29, 0.29],
+            ['俄罗斯', 0.26, 0.26, 0.26, 0.25, 0.25],
+            ['越南', 0.04, 0.04, 0.43, 0.03, 0.03]
+        ];
+
+        var pieData = [
+            ['country', '2020', '2021', '2022', '2023', '2024'],
+            ['中国', 40, 40, 34, 40, 48.9],
+            ['美国', 2, 2, 2, 2, 2.1],
+            ['缅甸', 19, 19, 16, 19, 23.3],
+            ['澳大利亚', 3, 3, 3, 3, 6.3],
+            ['印度', 6, 6, 5, 6, 7.7],
+            ['俄罗斯', 8, 8, 16, 9, 4.2],
+            ['越南', 20, 20, 17, 20, 3.9]
+        ];
+
+        // 优化饼图显示效果
+        option = {
+            backgroundColor: 'rgba(51,51,51,1)',
+            title: [
+                {
+                    text: '各国家储备量占比',
+                    left: 'center',
+                    top: '3%',
+                    textStyle: { color: '#ffffff', fontSize: 'clamp(14px, 3vw, 18px)' }
+                },
+                {
+                    text: '主要国家年度产量对比',
+                    left: 'center',
+                    top: '45%',
+                    textStyle: { color: '#ffffff', fontSize: 'clamp(14px, 3vw, 18px)' }
+                }
+            ],
+            legend: {
+                data: ['中国', '美国', '缅甸', '澳大利亚', '印度', '俄罗斯', '越南'],
+                textStyle: { color: '#ffffff', fontSize: 'clamp(12px, 2vw, 14px)' },
+                bottom: '3%',
+                left: 'center',
+                type: 'scroll',
+                pageButtonItemGap: 5,
+                pageButtonStyle: { color: '#ffffff' }
+            },
+            tooltip: {
+                trigger: 'axis',
+                showContent: true,
+                axisPointer: { type: 'shadow' },
+                textStyle: { fontSize: 'clamp(12px, 2vw, 14px)' }
+            },
+            dataset: {
+                source: lineData
+            },
+            xAxis: {
+                type: 'category',
+                data: ['2020', '2021', '2022', '2023', '2024'],
+                axisLine: { lineStyle: { color: '#ffffff' } },
+                axisLabel: { 
+                    textStyle: { color: '#ffffff', fontSize: 'clamp(12px, 2vw, 14px)' },
+                    rotate: 45
+                }
+            },
+            yAxis: {
+                name: '年产量（万吨）',
+                nameTextStyle: { color: '#ffffff', fontSize: 'clamp(12px, 2vw, 14px)' },
+                axisLine: { lineStyle: { color: '#ffffff' } },
+                axisLabel: { textStyle: { color: '#ffffff', fontSize: 'clamp(12px, 2vw, 14px)' } }
+            },
+            grid: {
+                top: '55%',
+                bottom: '15%',
+                left: '5%',
+                right: '5%',
+                containLabel: true,
+                borderColor: '#666'
+            },
+            series: [
+                // 折线图系列
+                { type: 'line', smooth: true, seriesLayoutBy: 'row', itemStyle: { color: seriesColors[0] } },
+                { type: 'line', smooth: true, seriesLayoutBy: 'row', itemStyle: { color: seriesColors[1] } },
+                { type: 'line', smooth: true, seriesLayoutBy: 'row', itemStyle: { color: seriesColors[2] } },
+                { type: 'line', smooth: true, seriesLayoutBy: 'row', itemStyle: { color: seriesColors[3] } },
+                { type: 'line', smooth: true, seriesLayoutBy: 'row', itemStyle: { color: seriesColors[4] } },
+                { type: 'line', smooth: true, seriesLayoutBy: 'row', itemStyle: { color: seriesColors[5] } },
+                { type: 'line', smooth: true, seriesLayoutBy: 'row', itemStyle: { color: seriesColors[6] } },
+                // 饼图系列 - 无阴影和边框线
+                {
+                    type: 'pie',
+                    id: 'pie',
+                    radius: '25%',
+                    center: ['50%', '23%'],
+                    itemStyle: { 
+                        // 移除了borderColor和borderWidth属性
+                    },
+                    label: {
+                        color: '#ffffff',
+                        formatter: '{d}%',  // 只显示百分比
+                        fontSize: 'clamp(12px, 2.5vw, 16px)',
+                        fontWeight: 'bold'
+                    },
+                    labelLine: {
+                        length: 15,
+                        length2: 10,
+                        lineStyle: {
+                            width: 2
+                        }
+                    },
+                    encode: {
+                        itemName: 'country',
+                        value: '2020',
+                        tooltip: '2020'
+                    },
+                    color: seriesColors.slice(0, 7) // 使用色系，与折线图对应
+                }
+            ]
+        };
+
+        // 图表联动事件
+        myChart.on('updateAxisPointer', function (event) {
+            const xAxisInfo = event.axesInfo[0];
+            if (xAxisInfo) {
+                const dimension = xAxisInfo.value + 1; // 年份索引从1开始（2020对应索引1）
+                const year = lineData[0][dimension]; // 获取当前年份
+                myChart.setOption({
+                    series: {
+                        id: 'pie',
+                        dataset: { source: pieData }, // 更新饼图数据集
+                        label: {
+                            formatter: '{d}%'  // 只显示百分比
+                        },
+                        encode: {
+                            value: dimension,
+                            tooltip: dimension
+                        }
+                    }
+                });
+            }
+        });
+
+        // 添加饼图点击事件，高亮显示对应国家的折线
+        myChart.on('click', 'series.pie', function(params) {
+            const countryIndex = params.dataIndex + 1; // 数据集中国家从第1行开始
+            
+            // 设置所有系列为普通状态
+            const lineSeries = option.series.slice(0, 7).map((series, index) => ({
+                ...series,
+                emphasis: {
+                    lineStyle: {
+                        width: 2
+                    }
+                }
+            }));
+            
+            // 高亮显示被点击国家的系列
+            lineSeries[countryIndex - 1] = {
+                ...lineSeries[countryIndex - 1],
+                emphasis: {
+                    lineStyle: {
+                        width: 4
+                    }
+                }
+            };
+            
+            myChart.setOption({
+                series: [...lineSeries, option.series[7]] // 保持饼图不变
+            });
+        });
+
+        // 初始化图表
+        myChart.setOption(option);
+    </script>
+</body>
+
+</html>
+    
