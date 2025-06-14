@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>常用稀土元素储备消耗对比数据表</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        #main {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="main"></div>
+    <script>
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        
+        // 稀土元素数据
+        const fullData = [
+            {
+                name: '镝(Dy)',
+                value: [30, 3000, 100, 95],
+                info: {
+                    应用: '永磁体（高温电机）、核反应堆控制棒',
+                    风险: '★★★★☆（极高）',
+                    国家: '中国、越南、巴西、印度、俄罗斯'
+                }
+            },
+            {
+                name: '铽(Tb)',
+                value: [15, 1200, 125, 98],
+                info: {
+                    应用: '荧光粉（LED）、航空航天涂层',
+                    风险: '★★★★☆（高高）',
+                    国家: '中国、俄罗斯、印度、巴西、马来西亚'
+                }
+            },
+            {
+                name: '铕(Eu)',
+                value: [5, 500, 100, 99],
+                info: {
+                    应用: '荧光粉（电极/显示器）、核反应堆屏蔽材料',
+                    风险: '★★★★☆（高高）',
+                    国家: '中国、美国、俄罗斯、澳大利亚、印度'
+                }
+            },
+            {
+                name: '钕(Nd)',
+                value: [3000, 60000, 50, 75],
+                info: {
+                    应用: '永磁体（风电/新能源车）、特种合金',
+                    风险: '★★★★☆（中高）',
+                    国家: '中国、美国、俄罗斯、澳大利亚、巴西'
+                }
+            },
+            {
+                name: '镨(Pr)',
+                value: [2500, 50000, 50, 70],
+                info: {
+                    应用: '永磁体（电机）、玻璃着色剂',
+                    风险: '★★★★☆（中高）',
+                    国家: '中国、美国、俄罗斯、澳大利亚、印度'
+                }
+            },
+            {
+                name: '镧(La)',
+                value: [3500, 150000, 23, 65],
+                info: {
+                    应用: '催化剂（石油蒸馏）、储氢材料',
+                    风险: '★★★★☆（低高）',
+                    国家: '中国、美国、俄罗斯、澳大利亚、巴西'
+                }
+            },
+            {
+                name: '铈(Ce)',
+                value: [3800, 180000, 21, 60],
+                info: {
+                    应用: '抛光粉、汽车尾气净化催化剂',
+                    风险: '★★★★☆（低高）',
+                    国家: '中国、美国、俄罗斯、澳大利亚、印度'
+                }
+            }
+        ];
+
+        // 颜色配置
+        const colors = ["#dd6b66", "#759aa0", "#e69d87", "#8dc1a9", 
+                       "#ea7e53", "#eedd78", "#73a373"];
+
+        // 自适应调整
+        const isMobile = window.innerWidth < 768;
+        
+        const option = {
+            backgroundColor: "rgba(51,51,51,1)",
+            title: {
+                text: '常用稀土元素储备消耗对比数据表',
+                textStyle: { 
+                    color: '#fff',
+                    fontSize: isMobile ? 16 : 20
+                },
+                left: 'center',
+                top: isMobile ? 10 : 20
+            },
+            tooltip: {
+                trigger: 'item',
+                backgroundColor: 'rgba(0,0,0,0.7)',
+                borderColor: '#333',
+                textStyle: {
+                    fontSize: isMobile ? 11 : 13
+                },
+                formatter: params => {
+                    const info = params.data.info;
+                    return `${params.name}<br/>
+                    ▶ 主要应用: ${info.应用}<br/>
+                    ▶ 资源风险: ${info.风险}<br/>
+                    ▶ 集中国家: ${info.国家}`;
+                }
+            },
+            radar: {
+                center: ['50%', '55%'],
+                radius: isMobile ? '60%' : '70%',
+                indicator: [
+                    { name: '全球储量（万吨）', max: 4000 },
+                    { name: '年消耗量（千吨）', max: 200 },
+                    { name: '储备寿命（年）', max: 150 },
+                    { name: '集中度（%）', max: 100 }
+                ],
+                axisName: {
+                    textStyle: { 
+                        color: '#fff',
+                        fontSize: isMobile ? 10 : 12
+                    }
+                },
+                splitArea: { show: false }
+            },
+            series: [{
+                type: 'radar',
+                data: fullData.map((item, index) => ({
+                    name: item.name,
+                    value: [
+                        item.value[0], // 全球储量
+                        item.value[1]/1000, // 转换为千吨
+                        item.value[2], // 储备寿命
+                        item.value[3]  // 集中度
+                    ],
+                    info: item.info, // 绑定附加信息
+                    itemStyle: { color: colors[index] },
+                    lineStyle: { color: colors[index], width: 1.5 },
+                    areaStyle: { color: colors[index], opacity: 0.1 }
+                }))
+            }],
+            legend: {
+                data: fullData.map(d => d.name),
+                textStyle: { 
+                    color: '#fff',
+                    fontSize: isMobile ? 10 : 12
+                },
+                orient: isMobile ? 'horizontal' : 'vertical',
+                right: isMobile ? 'center' : 20,
+                top: isMobile ? 'auto' : 60,
+                bottom: isMobile ? 10 : 'auto',
+                itemGap: isMobile ? 8 : 12,
+                pageButtonItemGap: 5,
+                pageButtonStyle: {
+                    color: '#fff'
+                }
+            }
+        };
+
+        // 添加单位说明
+        option.graphic = [{
+            type: 'text',
+            left: isMobile ? 'center' : 20,
+            bottom: isMobile ? 5 : 20,
+            style: {
+                text: '* 年消耗量单位：千吨 | 风险等级最高★★★★★',
+                fill: '#999',
+                fontSize: isMobile ? 9 : 12,
+                textAlign: isMobile ? 'center' : 'left'
+            }
+        }];
+
+        myChart.setOption(option);
+        
+        // 窗口大小变化时重绘图表
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>    
