@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <title>消费影响（氧化镨钕（轻稀土）为例）</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.2/echarts.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-container {
+            flex: 1;
+            min-height: 500px;
+            width: 100%;
+        }
+        .title {
+            padding: 15px;
+            text-align: center;
+            color: white;
+            background-color: rgba(51,51,51,1);
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">消费影响（氧化镨钕（轻稀土）为例）</h1>
+    <div class="chart-container" id="main"></div>
+    <script>
+        // 初始化图表
+        const chartDom = document.getElementById('main');
+        const myChart = echarts.init(chartDom);
+        
+        // 数据标准化处理
+        const data = [
+            { 
+                year: '2010-2011',
+                price: 127.5,         // 取最高值
+                change: 400,          // 取最低400%
+                factor: '中国稀土战略储备政策、出口配额收紧、黑稀土打击' 
+            },
+            { 
+                year: '2013-2014',
+                price: 45,            // 35-55中间值
+                change: 30,
+                factor: '工信部"稀土打黑"专项行动，非法开采减少' 
+            },
+            { 
+                year: '2017-2018',
+                price: 43.5,         // 32-55中间值
+                change: 20,
+                factor: '国储招标、环保限产、分离产能调整' 
+            },
+            { 
+                year: '2020-2021',
+                price: 110,           // 取2021年值
+                change: 320,
+                factor: '新能源车、风电需求爆发，供应链紧张' 
+            },
+            { 
+                year: '2022',
+                price: 119,           // 取峰值
+                change: 84,
+                factor: '俄乌冲突、中国出口管制、磁材企业补库' 
+            },
+            { 
+                year: '2023',
+                price: 35,           // 取Q2低点
+                change: -68,
+                factor: '进口矿增加、需求疲软（新能源车补贴退坡）' 
+            },
+            { 
+                year: '2024(H1)',
+                price: 38,            // 35-41中间值
+                change: 17,
+                factor: '缅甸矿进口减少、风电装机回暖' 
+            },
+            { 
+                year: '2025(4月)',
+                price: 61.5,          // 60-63中间值
+                change: 10,
+                factor: '关税战（中国对美加税84%）、核能订单预期' 
+            }
+        ];
+
+        // 图表配置
+        const option = {
+            backgroundColor: "rgba(51,51,51,1)",
+            color: ['#dd6b66', '#759aa0'],
+            tooltip: {
+                trigger: 'axis',
+                backgroundColor: 'rgba(255,255,255,0.9)',
+                textStyle: { color: '#333' },
+                formatter: params => {
+                    const yearData = data[params[0].dataIndex];
+                    return `
+                        <div style="font-weight:bold">${yearData.year}</div>
+                        <div>${params[0].marker} 价格: ${params[0].value} 万元/吨</div>
+                        <div>${params[1].marker} 同比: ${params[1].value}%</div>
+                        <div style="margin-top:5px">影响因素: ${yearData.factor}</div>
+                    `;
+                }
+            },
+            legend: { 
+                data: ['价格（万元/吨）', '同比变化（%）'], 
+                textStyle: { color: '#fff' },
+                top: '5%',
+                left: 'center'
+            },
+            grid: { 
+                top: '15%',
+                left: '5%',
+                right: '5%',
+                bottom: '15%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                data: data.map(item => item.year),
+                axisLabel: { 
+                    color: '#fff',
+                    rotate: 45,
+                    fontSize: 10,
+                    interval: 0
+                },
+                axisLine: { lineStyle: { color: '#999' } },
+                axisTick: { show: false }
+            },
+            yAxis: [
+                {
+                    type: 'value',
+                    name: '价格（万元/吨）',
+                    nameTextStyle: { color: '#fff' },
+                    axisLabel: { color: '#fff' },
+                    splitLine: { lineStyle: { color: '#666' } },
+                    axisLine: { lineStyle: { color: '#999' } }
+                },
+                {
+                    type: 'value',
+                    name: '同比变化（%）',
+                    nameTextStyle: { color: '#fff' },
+                    axisLabel: { 
+                        color: '#fff', 
+                        formatter: '{value}%' 
+                    },
+                    splitLine: { show: false },
+                    axisLine: { lineStyle: { color: '#999' } }
+                }
+            ],
+            series: [
+                {
+                    name: '价格（万元/吨）',
+                    type: 'bar',
+                    barWidth: '40%',
+                    data: data.map(item => item.price),
+                    itemStyle: {
+                        borderRadius: [6, 6, 0, 0],
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: '#dd6b66' },
+                            { offset: 1, color: '#8c4343' }
+                        ])
+                    }
+                },
+                {
+                    name: '同比变化（%）',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: data.map(item => item.change),
+                    symbol: 'diamond',
+                    symbolSize: 12,
+                    lineStyle: { 
+                        width: 3,
+                        color: '#759aa0' 
+                    },
+                    itemStyle: {
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    },
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(117, 154, 160, 0.4)' },
+                            { offset: 1, color: 'rgba(117, 154, 160, 0.05)' }
+                        ])
+                    }
+                }
+            ]
+        };
+
+        // 设置图表选项并添加响应式处理
+        myChart.setOption(option);
+        window.addEventListener('resize', () => myChart.resize());
+        
+        // 窗口加载完成后调整图表大小
+        window.addEventListener('load', () => myChart.resize());
+    </script>
+</body>
+</html>
+    
