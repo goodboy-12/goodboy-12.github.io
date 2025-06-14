@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稀土消费分布堆叠柱状图</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.1/echarts.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: auto;
+        }
+        .chart-container {
+            width: 100%;
+            height: 100vh;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #main {
+            flex: 1;
+            width: 100%;
+            min-height: 400px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div id="main"></div>
+    </div>
+    <script>
+        // 初始化图表
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        
+        // 颜色列表
+        var colorList = ["#dd6b66", "#759aa0", "#e69d87", "#8dc1a9", "#ea7e53", "#eedd78", "#73a373"];
+
+        // 数据
+        const rawData = [
+            { region: '中国', values: [42, 20, 15, 10, 8, 5], total: 19.8 },
+            { region: '美国', values: [30, 25, 10, 15, 5, 15], total: 4.2 },
+            { region: '日本', values: [35, 25, 20, 10, 5, 5], total: 3.8 },
+            { region: '欧盟', values: [40, 20, 10, 15, 5, 10], total: 3.5 },
+            { region: '韩国', values: [45, 15, 20, 10, 5, 5], total: 2.1 },
+            { region: '印度', values: [30, 15, 10, 10, 20, 15], total: 1.2 },
+            { region: '澳大利亚', values: [10, 15, 5, 50, 10, 10], total: 0.8 }
+        ];
+
+        // 构建系列数据
+        const categories = ['永磁体', '催化剂', '发光材料', '合金', '玻璃陶瓷', '其他'];
+        
+        // 保存完整系列配置，用于切换显示
+        const allSeries = categories.map((name, idx) => ({
+            name,
+            type: 'bar',
+            stack: '百分比',
+            yAxisIndex: 0, // 使用第一个Y轴
+            data: rawData.map(d => d.values[idx] / 100),
+            itemStyle: { color: colorList[idx] },
+            label: { 
+                show: true, 
+                formatter: '{c}%',
+                fontSize: 12,
+                position: 'insideRight'
+            }
+        }));
+        
+        // 消费总量系列
+        const consumptionSeries = {
+            name: '消费总量（万吨 REO）',
+            type: 'bar',
+            yAxisIndex: 1, // 使用第二个Y轴
+            data: rawData.map(d => d.total),
+            itemStyle: { color: '#73b9bc' },
+            label: { 
+                show: true, 
+                position: 'right',
+                fontSize: 12
+            }
+        };
+
+        // 初始配置项
+        const option = {
+            backgroundColor: "rgba(51,51,51,1)",
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: { type: 'shadow' },
+                formatter: function(params) {
+                    let res = params[0].name;
+                    
+                    // 如果只选中了消费总量
+                    if (params.length === 1 && params[0].seriesName === '消费总量（万吨 REO）') {
+                        res += `<br/>${params[0].marker} ${params[0].seriesName}: ${params[0].value}万吨`;
+                        return res;
+                    }
+                    
+                    // 遍历所有系列
+                    params.forEach(p => {
+                        if (p.seriesName.includes('消费总量')) {
+                            res += `<br/>${p.marker} ${p.seriesName}: ${p.value}万吨`;
+                        } else {
+                            res += `<br/>${p.marker} ${p.seriesName}: ${(p.value * 100).toFixed(0)}%`;
+                        }
+                    });
+                    
+                    return res;
+                }
+            },
+            legend: { 
+                textStyle: { color: '#fff' },
+                top: '3%',
+                type: 'scroll',
+                pageButtonItemGap: 5,
+                pageButtonColor: '#fff',
+                pageButtonHoverColor: '#fff',
+                pageFormatter: '{current}/{total}',
+                selected: {
+                    '消费总量（万吨 REO）': false
+                }
+            },
+            grid: { 
+                left: '12%', 
+                right: '10%', 
+                bottom: '10%',
+                top: '15%',
+                containLabel: true 
+            },
+            yAxis: [
+                {
+                    id: 'categoryAxis',
+                    type: 'category',
+                    data: rawData.map(d => d.region),
+                    axisLabel: { 
+                        color: '#fff',
+                        fontSize: 12,
+                        interval: 0
+                    },
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                },
+                {
+                    id: 'consumptionAxis',
+                    type: 'category',
+                    show: false,
+                    position: 'right',
+                    data: rawData.map(d => d.region)
+                }
+            ],
+            xAxis: [
+                {
+                    id: 'percentAxis',
+                    type: 'value',
+                    axisLabel: { 
+                        color: '#fff',
+                        formatter: value => `${(value * 100).toFixed(0)}%`,
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        show: true,
+                        lineStyle: {
+                            color: 'rgba(255,255,255,0.1)'
+                        }
+                    }
+                },
+                {
+                    id: 'consumptionAxis',
+                    type: 'value',
+                    alignTicks: true,
+                    axisLabel: { 
+                        color: '#fff', 
+                        formatter: '{value} 万吨',
+                        fontSize: 12
+                    },
+                    splitLine: {
+                        show: false
+                    }
+                }
+            ],
+            series: [...allSeries, consumptionSeries], // 初始显示所有系列
+            animation: true,
+            animationDuration: 1000
+        };
+
+        // 设置图表选项
+        myChart.setOption(option);
+
+        // 监听窗口大小变化，自适应调整图表
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+        
+        // 点击图例时的处理
+        myChart.on('legendselectchanged', function(params) {
+            const selected = params.selected;
+            const isConsumptionSelected = selected['消费总量（万吨 REO）'];
+            
+            // 获取所有类别系列的选中状态
+            const categorySelected = categories.some(cat => selected[cat]);
+            
+            // 如果选中了消费总量，隐藏其他数据
+            if (isConsumptionSelected && !categorySelected) {
+                myChart.setOption({
+                    // 隐藏分类数据系列
+                    series: categories.map(name => ({
+                        name: name,
+                        silent: true,  // 不响应鼠标事件
+                        label: {
+                            show: false
+                        },
+                        itemStyle: {
+                            opacity: 0
+                        }
+                    })).concat({
+                        // 显示消费总量系列
+                        name: '消费总量（万吨 REO）',
+                        silent: false,
+                        label: {
+                            show: true
+                        },
+                        itemStyle: {
+                            opacity: 1
+                        }
+                    }),
+                    // 调整Y轴配置
+                    yAxis: [
+                        {
+                            id: 'categoryAxis',
+                            offset: 0
+                        },
+                        {
+                            id: 'consumptionAxis',
+                            show: true,
+                            offset: 0
+                        }
+                    ],
+                    // 调整X轴配置
+                    xAxis: [
+                        {
+                            id: 'percentAxis',
+                            show: false
+                        },
+                        {
+                            id: 'consumptionAxis',
+                            show: true
+                        }
+                    ]
+                });
+            } else {
+                // 如果取消选中消费总量或选中了其他类别，显示其他数据
+                myChart.setOption({
+                    // 显示分类数据系列
+                    series: categories.map(name => ({
+                        name: name,
+                        silent: !selected[name],
+                        label: {
+                            show: selected[name]
+                        },
+                        itemStyle: {
+                            opacity: selected[name] ? 1 : 0
+                        }
+                    })).concat({
+                        // 隐藏消费总量系列
+                        name: '消费总量（万吨 REO）',
+                        silent: !isConsumptionSelected,
+                        label: {
+                            show: isConsumptionSelected
+                        },
+                        itemStyle: {
+                            opacity: isConsumptionSelected ? 1 : 0
+                        }
+                    }),
+                    // 调整Y轴配置
+                    yAxis: [
+                        {
+                            id: 'categoryAxis',
+                            offset: 0
+                        },
+                        {
+                            id: 'consumptionAxis',
+                            show: isConsumptionSelected,
+                            offset: 0
+                        }
+                    ],
+                    // 调整X轴配置
+                    xAxis: [
+                        {
+                            id: 'percentAxis',
+                            show: !isConsumptionSelected
+                        },
+                        {
+                            id: 'consumptionAxis',
+                            show: isConsumptionSelected
+                        }
+                    ]
+                });
+            }
+        });
+    </script>
+</body>
+</html>
