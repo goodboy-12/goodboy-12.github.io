@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全国产业链与贸易格局（主要进口国）</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .chart-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        #main {
+            flex: 1;
+            min-height: 400px;
+        }
+        .legend-container {
+            position: absolute;
+            right: 10px;
+            top: 60px;
+            z-index: 10;
+            padding: 10px;
+            background-color: rgba(50,50,50,0.7);
+            border-radius: 5px;
+        }
+        @media (max-width: 768px) {
+            .legend-container {
+                position: static;
+                background-color: transparent;
+                padding: 5px;
+            }
+            .chart-container {
+                height: auto;
+                min-height: 100vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chart-container">
+        <div id="main"></div>
+        <div class="legend-container" id="legend"></div>
+    </div>
+    <script>
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        
+        // 完整国家数据
+        const countries = [
+            {
+                name: '美国',
+                value: [3.2, 89, 4.5, 2],
+                sources: '中国（45%）、缅甸（28%）、澳大利亚（17%）',
+                usage: '永磁体（42%）、国防（25%）、电子（18%）'
+            },
+            {
+                name: '日本',
+                value: [1.8, 92, 3.5, 2],
+                sources: '越南（34%）、中国（29%）、印度（15%）',
+                usage: '汽车（51%）、电子（23%）、医疗（12%）'
+            },
+            {
+                name: '德国',
+                value: [1.2, 78, 3.5, 1],
+                sources: '中国（65.5%）、奥地利（23.2%）',
+                usage: '工业电机（58%）、汽车（21%）、环保（10%）'
+            },
+            {
+                name: '韩国',
+                value: [0.9, 84, 4.0, 1],
+                sources: '中国（50%）、美国（22%）、马来西亚（18%）',
+                usage: '电子（67%）、汽车（19%）、航空航天（8%）'
+            },
+            {
+                name: '印度',
+                value: [0.7, 62, 3.0, 2],
+                sources: '中国（48%）、缅甸（27%）、俄罗斯（15%）',
+                usage: '钢铁（41%）、电子（26%）、催化剂（14%）'
+            },
+            {
+                name: '中国',
+                value: [13.3, 20, 3.0, 3],
+                sources: '美国（42%）、缅甸（31%）、老挝（15%）',
+                usage: '深加工（60%）、特定元素补充（25%）'
+            }
+        ];
+
+        // 颜色配置（中国使用亮黄色）
+        const colors = ["#dd6b66", "#759aa0", "#e69d87", "#8dc1a9", "#ea7e53", "#ffff00"];
+
+        const option = {
+            backgroundColor: "rgba(51,51,51,1)",
+            title: {
+                text: '全国产业链与贸易格局（主要进口国）',
+                textStyle: { color: '#fff', fontSize: 18 },
+                left: 'center',
+                top: 10
+            },
+            tooltip: {
+                trigger: 'item',
+                position: function (pos, params, dom, rect, size) {
+                    return { 
+                        left: pos[0] < size.viewSize[0]/2 ? pos[0]+20 : pos[0]-size.contentSize[0]-20,
+                        top: pos[1]-50 
+                    };
+                },
+                formatter: params => {
+                    return `<div style="max-width:400px; line-height:1.6; padding:8px;">
+                        <strong style="color:${params.color}">${params.name}</strong><br/>
+                        <span style="color:#ddd">▶ 来源国：</span>${params.data.sources}<br/>
+                        <span style="color:#ddd">▶ 用途结构：</span>${params.data.usage}
+                    </div>`;
+                },
+                backgroundColor: 'rgba(50,50,50,0.95)',
+                extraCssText: 'box-shadow: 0 0 15px rgba(0,0,0,0.7); border-radius:5px;'
+            },
+            radar: {
+                center: ['50%', '55%'],
+                radius: '70%',
+                indicator: [
+                    { name: '进口量（万吨）', max: 15 },
+                    { name: '对外依存度（%）', max: 100 },
+                    { name: '政策风险', max: 5 },
+                    { name: '供应链韧性', max: 3 }
+                ],
+                axisName: {
+                    textStyle: { 
+                        color: '#fff',
+                        fontSize: 12
+                    }
+                },
+                splitArea: { show: false }
+            },
+            series: [{
+                type: 'radar',
+                data: countries.map((item, index) => ({
+                    name: item.name,
+                    value: item.value,
+                    sources: item.sources,
+                    usage: item.usage,
+                    itemStyle: { color: colors[index] },
+                    lineStyle: { color: colors[index], width: 2 },
+                    areaStyle: { color: colors[index], opacity: 0.15 }
+                }))
+            }],
+            legend: {
+                data: countries.map(d => d.name),
+                textStyle: { color: '#fff' },
+                orient: 'vertical',
+                right: 20,
+                top: 60,
+                itemGap: 12,
+                type: 'scroll',
+                pageButtonItemGap: 5,
+                pageButtonPosition: 'end',
+                pageFormatter: '{current}/{total}'
+            },
+            graphic: [{
+                type: 'text',
+                left: 'center',
+                bottom: 20,
+                style: {
+                    text: '供应链韧性量化：低=0 中=2 高=3 | 政策风险★=1',
+                    fill: '#999',
+                    fontSize: 12
+                }
+            }]
+        };
+
+        myChart.setOption(option);
+        
+        // 窗口大小变化时重绘图表
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
+    
