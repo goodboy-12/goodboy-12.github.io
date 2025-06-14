@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>全球稀土回收市场潜力数据</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        #main {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="main"></div>
+
+    <script>
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        
+        // 技术成熟度数据（按顺序对应）
+        const techLevels = [
+            "高（规模化回收工艺成熟）",
+            "中（镧/铈回收为主）",
+            "低（分散回收难度大）",
+            "中（稀土合金回收技术突破）",
+            "中（铈基材料回收占据主导）"
+        ];
+
+        var option = {
+            backgroundColor: "rgba(51,51,51,1)",
+            title: {
+                text: '全球稀土回收市场潜力数据',
+                left: 'center',
+                textStyle: { 
+                    color: '#fff',
+                    fontSize: 'clamp(1.2rem, 3vw, 1.8rem)'
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: params => {
+                    return `市场占比: ${params.percent}%<br/>回收技术成熟度:<br/>${techLevels[params.dataIndex]}`;
+                },
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                textStyle: { color: '#fff' }
+            },
+            legend: {
+                orient: 'vertical',
+                left: 'left',
+                textStyle: { 
+                    color: '#fff',
+                    fontSize: 'clamp(0.8rem, 2vw, 1rem)'
+                },
+                itemWidth: 15,
+                itemHeight: 15,
+                pageButtonItemGap: 5,
+                pageButtonColor: '#fff',
+                pageButtonBorderColor: '#fff',
+                pageFormatter: '{current}/{total}',
+                pageTextStyle: {
+                    color: '#fff'
+                }
+            },
+            color: ["#dd6b66", "#759aa0", "#e69d87", "#8dc1a9", "#ea7e53"],
+            series: [{
+                name: '市场占比',
+                type: 'pie',
+                radius: ['30%', '60%'],
+                center: ['50%', '50%'],
+                data: [
+                    { value: 45, name: '永磁体（风电/新能源汽车）' },
+                    { value: 20, name: '催化剂（石油/尾气净化）' },
+                    { value: 15, name: '荧光粉（LED/显示面板）' },
+                    { value: 10, name: '储氢材料（燃料电池）' },
+                    { value: 10, name: '其他（陶瓷抛光材料）' }
+                ],
+                label: { 
+                    color: '#fff',
+                    fontSize: 'clamp(0.8rem, 1.5vw, 1rem)',
+                    formatter: '{b}: {d}%',
+                    overflow: 'break',
+                    width: 100
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(255, 255, 255, 0.3)'
+                    }
+                }
+            }]
+        };
+
+        myChart.setOption(option);
+        
+        // 窗口大小变化时重绘图表
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
+    
