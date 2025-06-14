@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>全球产业链与贸易格局（主要出口国）</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            background-color: rgba(51,51,51,1);
+        }
+        .container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .chart-container {
+            flex: 1;
+            min-height: 400px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #main {
+            width: 100%;
+            height: 100%;
+        }
+        @media (max-width: 768px) {
+            .chart-container {
+                padding: 5px;
+            }
+            .echarts-legend {
+                position: static !important;
+                transform: none !important;
+                text-align: center;
+                padding: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="chart-container">
+            <div id="main"></div>
+        </div>
+    </div>
+    <script>
+        // 等待DOM加载完成
+        document.addEventListener('DOMContentLoaded', function() {
+            var chartDom = document.getElementById('main');
+            var myChart = echarts.init(chartDom);
+            
+            // 出口国数据（已量化处理）
+            const countries = [
+                {
+                    name: '中国',
+                    value: [5.54, 29700, 4.0, 3], // [出口量, 均价, 风险等级, 供应链韧性]
+                    destinations: '日本（18.8%）、美国（17.6%）、德国（9.9%）',
+                    products: '永磁体（45.8%）、氢化镓（8.3%）、催化剂（6.7%）'
+                },
+                {
+                    name: '英国',
+                    value: [4.69, 30500, 3.5, 1], // 矿石价格按30.5元/千克≈30500美元/吨
+                    destinations: '中国（98%）、日本（1.2%）、韩国（0.8%）',
+                    products: '稀土金属矿（99.8%）、氢化镓钕（0.2%）'
+                },
+                {
+                    name: '缅甸',
+                    value: [3.1, 10200, 4.5, 1],
+                    destinations: '中国（57%）、日本（21%）、韩国（12%）',
+                    products: '混合稀土矿（68%）、氢化镓（22%）、氢化钕（10%）'
+                },
+                {
+                    name: '澳大利亚',
+                    value: [1.3, 19400, 3.0, 2],
+                    destinations: '中国（42%）、日本（35%）、美国（18%）',
+                    products: '轻稀土精矿（85%）、氢化镓钕（12%）、重稀土化合物（3%）'
+                },
+                {
+                    name: '俄罗斯',
+                    value: [0.8, 15600, 3.5, 1],
+                    destinations: '中国（87%）、哈萨克斯坦（13%）',
+                    products: '混合稀土矿（70%）、氢化镓钕（20%）、锂铁合金（10%）'
+                },
+                {
+                    name: '印度',
+                    value: [0.3, 8900, 3.0, 2],
+                    destinations: '日本（40%）、中国（30%）、欧盟（20%）',
+                    products: '轻固石（55%）、氢化镓（30%）、稀土原料（15%）'
+                },
+                {
+                    name: '越南',
+                    value: [0.2, 12500, 3.5, 1],
+                    destinations: '中国（65%）、日本（20%）、韩国（15%）',
+                    products: '高于型稀土矿（75%）、氢化镓钕（20%）、稀土金属（5%）'
+                }
+            ];
+
+            // 颜色配置（中国使用亮黄色）
+            const colors = ["#ffff00", "#dd6b66", "#759aa0", 
+                           "#e69d87", "#8dc1a9", "#ea7e53", "#7289ab"];
+
+            const option = {
+                backgroundColor: "rgba(51,51,51,1)",
+                title: {
+                    text: '全球产业链与贸易格局（主要出口国）',
+                    textStyle: { 
+                        color: '#fff',
+                        fontSize: 18
+                    },
+                    left: 'center',
+                    top: 10
+                },
+                tooltip: {
+                    trigger: 'item',
+                    position: function (pos, params, dom, rect, size) {
+                        return { 
+                            left: pos[0] < size.viewSize[0]/2 ? pos[0]+20 : pos[0]-size.contentSize[0]-20,
+                            top: pos[1]-50 
+                        };
+                    },
+                    formatter: params => {
+                        return `<div style="max-width:400px; line-height:1.6; padding:8px;">
+                            <strong style="color:${params.color}">${params.name}</strong><br/>
+                            <span style="color:#ddd">▶ 主要目的地：</span>${params.data.destinations}<br/>
+                            <span style="color:#ddd">▶ 出口结构：</span>${params.data.products}
+                        </div>`;
+                    },
+                    backgroundColor: 'rgba(50,50,50,0.95)',
+                    extraCssText: 'box-shadow: 0 0 15px rgba(0,0,0,0.7); border-radius:5px;'
+                },
+                radar: {
+                    indicator: [
+                        { name: '出口量（万吨）', max: 6 },
+                        { name: '出口均价（美元/吨）', max: 35000 },
+                        { name: '政策风险', max: 5 },  // ★★★★★=5
+                        { name: '供应链韧性', max: 3 } // 低=1 中=2 高=3
+                    ],
+                    axisName: {
+                        textStyle: { 
+                            color: '#fff',
+                            fontSize: 12
+                        }
+                    },
+                    splitArea: { show: false },
+                    center: ['50%', '50%'],
+                    radius: '65%'
+                },
+                series: [{
+                    type: 'radar',
+                    data: countries.map((item, index) => ({
+                        name: item.name,
+                        value: item.value,
+                        destinations: item.destinations,
+                        products: item.products,
+                        itemStyle: { color: colors[index] },
+                        lineStyle: { color: colors[index], width: 2 },
+                        areaStyle: { color: colors[index], opacity: 0.15 }
+                    }))
+                }],
+                legend: {
+                    data: countries.map(d => d.name),
+                    textStyle: { color: '#fff' },
+                    orient: 'vertical',
+                    right: 10,
+                    top: 'middle',
+                    itemGap: 12,
+                    type: 'scroll'
+                },
+                graphic: [{
+                    type: 'text',
+                    left: 10,
+                    bottom: 10,
+                    style: {
+                        text: '供应链韧性量化：低=1 中=2 高=3 | 政策风险★=1',
+                        fill: '#999',
+                        fontSize: 10
+                    }
+                }]
+            };
+
+            myChart.setOption(option);
+            
+            // 监听窗口大小变化，自适应调整图表
+            window.addEventListener('resize', function() {
+                myChart.resize();
+            });
+        });
+    </script>
+</body>
+</html>
+    
