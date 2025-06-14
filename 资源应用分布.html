@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稀土资源应用分布</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: rgba(51,51,51,1);
+            color: white;
+        }
+        .header {
+            padding: 1rem;
+            text-align: center;
+        }
+        .chart-container {
+            flex: 1;
+            min-height: 300px;
+            padding: 1rem;
+        }
+        #main {
+            width: 100%;
+            height: 100%;
+        }
+        .footer {
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>稀土资源应用分布</h1>
+        </div>
+        <div class="chart-container">
+            <div id="main"></div>
+        </div>
+        <div class="footer">
+            <p>数据可视化展示</p>
+        </div>
+    </div>
+
+    <script>
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        
+        var option = {
+            color: [
+                "#dd6b66", "#759aa0", "#e69d87", "#8dc1a9", "#ea7e53",
+                "#eedd78", "#73a373", "#73b9bc", "#7289ab", "#91ca8c", "#f49f42"
+            ],
+            backgroundColor: "rgba(51,51,51,1)",
+            tooltip: {
+                trigger: 'item',
+                formatter: function(params) {
+                    if (params.seriesIndex === 0) {
+                        return params.name === '轻稀土' 
+                            ? '支撑新能源产业(风电、电动车)，技术成熟但面临回收压力'
+                            : '不可替代的战略资源，中国出口管制强化定价权';
+                    }
+                    return `${params.name}<br/>占比: ${params.percent}%`;
+                }
+            },
+            legend: { show: false },
+            series: [
+                {   // 内环
+                    name: '稀土类型',
+                    type: 'pie',
+                    selectedMode: 'single',
+                    radius: [0, '30%'],
+                    label: { position: 'inner', fontSize: 14 },
+                    labelLine: { show: false },
+                    data: [
+                        { value: 92, name: '轻稀土' },
+                        { value: 8, name: '重稀土' }
+                    ]
+                },
+                {   // 外环
+                    name: '核心领域应用',
+                    type: 'pie',
+                    radius: ['45%', '60%'],
+                    labelLine: { length: 30 },
+                    label: {
+                        formatter: '{b|{b}}\n{per|{d}%}',
+                        rich: {
+                            b: { color: '#FFF', fontSize: 12, padding: [0, 5] },
+                            per: {
+                                color: '#fff',
+                                backgroundColor: '#4C5058',
+                                padding: [2, 4],
+                                borderRadius: 4
+                            }
+                        }
+                    },
+                    data: [
+                        { value: 85, name: '永磁材料（轻）' },
+                        { value: 70, name: '催化剂（轻）' },
+                        { value: 90, name: '玻璃陶瓷（轻）' },
+                        { value: 80, name: '回收合金（轻）' },
+                        { value: 100, name: '高端磁体（重）' },
+                        { value: 80, name: '航空航天（重）' }
+                    ]
+                }
+            ]
+        };
+
+        myChart.setOption(option);
+
+        // 响应式处理
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
