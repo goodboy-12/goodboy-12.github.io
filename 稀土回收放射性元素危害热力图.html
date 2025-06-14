@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稀土回收放射性元素危害热力图</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: rgba(51,51,51,1);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: rgba(60,60,60,0.8);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(80, 80, 80, 0.3);
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, #dd6b66, #e69d87, #f49f42);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ffffff;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .chart-container {
+            height: 700px;
+            width: 100%;
+            background: rgba(60,60,60,0.8);
+            border-radius: 15px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            margin-bottom: 40px;
+            position: relative;
+            padding: 20px;
+        }
+        
+        #heatmap-chart {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .info-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+        
+        .info-card {
+            background: rgba(60,60,60,0.8);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(80, 80, 80, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .info-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .info-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            color: #e69d87;
+            display: flex;
+            align-items: center;
+        }
+        
+        .info-card h3 i {
+            margin-right: 10px;
+            font-size: 1.6rem;
+        }
+        
+        .info-card p {
+            line-height: 1.7;
+            color: #ffffff;
+        }
+        
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+            margin-top: 30px;
+            margin-bottom: 40px;
+            padding: 25px;
+            background: rgba(60,60,60,0.8);
+            border-radius: 12px;
+            width: 100%;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .legend-color {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+        }
+        
+        .legend-text {
+            font-size: 1.1rem;
+            color: #ffffff;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #9090b0;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 500px;
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .info-card {
+                padding: 20px;
+            }
+            
+            .info-card h3 {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chart-container {
+                height: 400px;
+            }
+            
+            .legend {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>稀土回收放射性元素危害热力图</h1>
+            <p class="subtitle">本热力图展示了稀土回收过程中各类放射性元素的危害程度，包括放射性强度、生物毒性和环境风险等关键指标</p>
+        </header>
+        
+        <div class="chart-container">
+            <div id="heatmap-chart"></div>
+        </div>
+        
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #dd6b66;"></div>
+                <div class="legend-text">极高危害 (5级)</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #e69d87;"></div>
+                <div class="legend-text">高危害 (4级)</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f49f42;"></div>
+                <div class="legend-text">中危害 (3级)</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #8dc1a9;"></div>
+                <div class="legend-text">低危害 (2级)</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #73b9bc;"></div>
+                <div class="legend-text">极低危害 (1级)</div>
+            </div>
+        </div>
+        
+        <div class="info-panel">
+            <div class="info-card">
+                <h3>钍 (Th) 和铀 (U)</h3>
+                <p>主要存在于轻稀土矿中，在开采和冶炼过程中产生含放射性废渣。废渣γ辐射剂量率可达4,000 nGy/h（超背景值100倍），长期接触会导致DNA损伤。</p>
+            </div>
+            <div class="info-card">
+                <h3>镭 (Ra)</h3>
+                <p>铀/钍衰变次级产物，易溶于水，通过地下水扩散，污染饮用水源。其生物富集系数是铀的200倍，对骨骼有极强的亲和力。</p>
+            </div>
+            <div class="info-card">
+                <h3>复合污染</h3>
+                <p>废渣中放射性元素与重金属(As, Pb, Zn)共存，形成放射-化学复合污染。例如：稀土厂土壤砷含量可达263.83 mg/kg（超标准6倍），同时钍活度超1万Bq/kg。</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化图表
+        const chartDom = document.getElementById('heatmap-chart');
+        const myChart = echarts.init(chartDom);
+        
+        // 稀土元素数据
+        const elements = [
+            '钍 (Th)', '铀 (U)', '镭 (Ra)', '钷 (Pm)', '钾-40 (K)', '其他稀土'
+        ];
+        
+        // 危害维度
+        const dimensions = [
+            '放射性强度', '半衰期', '生物毒性', '环境风险', '综合危害'
+        ];
+        
+        // 危害数据 (元素, 维度, 危害值)
+        const data = [
+            // 钍 (Th)
+            [0, 0, 5], [0, 1, 5], [0, 2, 4], [0, 3, 5], [0, 4, 5],
+            // 铀 (U)
+            [1, 0, 5], [1, 1, 5], [1, 2, 5], [1, 3, 5], [1, 4, 5],
+            // 镭 (Ra)
+            [2, 0, 5], [2, 1, 4], [2, 2, 5], [2, 3, 5], [2, 4, 5],
+            // 钷 (Pm)
+            [3, 0, 3], [3, 1, 2], [3, 2, 3], [3, 3, 3], [3, 4, 3],
+            // 钾-40 (K)
+            [4, 0, 2], [4, 1, 2], [4, 2, 1], [4, 3, 2], [4, 4, 2],
+            // 其他稀土
+            [5, 0, 1], [5, 1, 1], [5, 2, 1], [5, 3, 1], [5, 4, 1]
+        ].map(function (item) {
+            return [item[1], item[0], item[2]];
+        });
+        
+        // 配置项
+        const option = {
+            backgroundColor: "rgba(51,51,51,1)",
+            title: {
+                text: '稀土元素放射性危害热力图',
+                textStyle: {
+                    color: '#e0e0e0',
+                    fontSize: 22,
+                    fontWeight: 'bold'
+                },
+                left: 'center',
+                top: 10
+            },
+            tooltip: {
+                position: 'top',
+                formatter: function(params) {
+                    return `${elements[params.value[1]]}<br>${dimensions[params.value[0]]}<br>危害等级: ${params.value[2]}`;
+                }
+            },
+            grid: {
+                top: '15%',
+                bottom: '15%',
+                left: '12%',
+                right: '5%'
+            },
+            xAxis: {
+                type: 'category',
+                data: dimensions,
+                splitArea: {
+                    show: true
+                },
+                axisLabel: {
+                    color: '#a0a0a0',
+                    rotate: 45,
+                    interval: 0
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#606060'
+                    }
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: elements,
+                splitArea: {
+                    show: true
+                },
+                axisLabel: {
+                    color: '#a0a0a0'
+                },
+                axisLine: {
+                    lineStyle: {
+                        color: '#606060'
+                    }
+                }
+            },
+            visualMap: {
+                min: 1,
+                max: 5,
+                calculable: true,
+                orient: 'horizontal',
+                left: 'center',
+                bottom: '5%',
+                textStyle: {
+                    color: '#e0e0e0'
+                },
+                inRange: {
+                    color: [
+                        '#73b9bc', // 1级
+                        '#8dc1a9', // 2级
+                        '#f49f42', // 3级
+                        '#e69d87', // 4级
+                        '#dd6b66'  // 5级
+                    ]
+                }
+            },
+            series: [{
+                name: '放射性危害',
+                type: 'heatmap',
+                data: data,
+                label: {
+                    show: true,
+                    formatter: function(params) {
+                        return params.value[2];
+                    },
+                    color: '#333',
+                    fontWeight: 'bold'
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(255, 255, 255, 0.5)'
+                    }
+                },
+                itemStyle: {
+                    borderWidth: 1,
+                    borderColor: 'rgba(100, 100, 100, 0.5)'
+                }
+            }]
+        };
+
+        // 应用配置
+        myChart.setOption(option);
+        
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>    
