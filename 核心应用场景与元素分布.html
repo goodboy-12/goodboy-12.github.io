@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>核心应用场景与元素分布</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.1/dist/echarts.min.js"></script>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: rgba(51,51,51,1); /* 使用原始背景色 */
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .header {
+            background-color: #222;
+            color: white;
+            text-align: center;
+            padding: 1.25rem 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: clamp(1.5rem, 3vw, 2.5rem); /* 响应式字体大小 */
+        }
+        .chart-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            padding: 1.25rem;
+            flex: 1;
+        }
+        .chart-card {
+            background-color: rgba(68,68,68,0.9); /* 使用接近原始背景的颜色 */
+            border-radius: 0.75rem;
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .chart-card:hover {
+            transform: translateY(-0.25rem);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3);
+        }
+        .chart-title {
+            background-color: #333;
+            color: white;
+            padding: 0.875rem 1.25rem;
+            margin: 0;
+            font-size: clamp(1.1rem, 2vw, 1.3rem); /* 响应式字体大小 */
+            font-weight: 500;
+        }
+        .chart-wrapper {
+            flex: 1;
+            min-height: 300px;
+            padding: 0.75rem;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            .pie-chart-container {
+                grid-column: span 2;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>核心应用场景与元素分布</h1>
+        </header>
+        
+        <main class="chart-container">
+            <div class="chart-card">
+                <h2 class="chart-title">国防领域 - 单台/套用量</h2>
+                <div id="militaryChart" class="chart-wrapper"></div>
+            </div>
+            
+            <div class="chart-card">
+                <h2 class="chart-title">民用领域 - 单台/套用量</h2>
+                <div id="civilChart" class="chart-wrapper"></div>
+            </div>
+            
+            <div class="chart-card pie-chart-container">
+                <h2 class="chart-title">全球年消费量占比</h2>
+                <div id="pieChart" class="chart-wrapper"></div>
+            </div>
+        </main>
+    </div>
+
+    <script type="text/javascript">
+        // 数据预处理
+        const militaryData = [
+            { product: "F-35/F-47 战机涂层", elements: "轧 (Gd)、钇 (Y)、镍 (La)", usage: [5,10], params: "吸收 X 波段雷达波（吸收率 > 90%），耐受 2000℃高温抗氧化" },
+            { product: "导弹惯性导航陀螺仪", elements: "镝 (Dy)、铱 (Tb)、钕 (Nd)", usage: [1,3], params: "钕铁硼永磁体磁能积 > 400 kJ/m³，确保飞行轨迹精度误差 < 0.1%" },
+            { product: "核潜艇控制棒", elements: "轧 (Gd)、铬 (Eu)", usage: [100,200], params: "中子吸收截面 > 40,000 barns（轧 - 157），控制核裂变速率" },
+            { product: "舰载激光防御系统", elements: "钕 (Nd)、钼 (Ef)", usage: [2,5], params: "掺杂浓度 > 5%（Nd:YAG 晶体），输出功率 > 100 kW" }
+        ];
+
+        const civilData = [
+            { product: "日光 LED 荧光粉", elements: "铬 (Eu)、铱 (Tb)", usage: [0.01,0.05], params: "蓝光激发效率 > 85%（YAG:Ce²⁺），色温范围 2700-6500 K" },
+            { product: "OLED/QLED 显示材料", elements: "铬 (Eu)、镍 (Yb)", usage: [0.1,0.3], params: "红色荧光粉量子效率 > 90%（Eu⁺掺杂），色域覆盖率 > 120% NTSC" },
+            { product: "永磁驱动电机", elements: "钕 (Nd)、镝 (Dy)", usage: [2,5], params: "钕铁硼磁体工作温度 > 180℃，功率密度 > 4 kW/kg" },
+            { product: "直驱永磁发电机", elements: "钕 (Nd)、镝 (Dy)", usage: [500,1000], params: "磁钢用量占发电机重量的 3-5%，单机容量 > 10 MW" }
+        ];
+
+        const pieData = [
+            { 
+                name: '隐身涂层', 
+                value: 18,
+                params: militaryData[0].params,
+                elements: militaryData[0].elements
+            },
+            { 
+                name: '制导系统', 
+                value: 28,
+                params: militaryData[1].params,
+                elements: militaryData[1].elements
+            },
+            { 
+                name: '核反应堆控制', 
+                value: 13,
+                params: militaryData[2].params,
+                elements: militaryData[2].elements
+            },
+            { 
+                name: '激光武器', 
+                value: 10,
+                params: militaryData[3].params,
+                elements: militaryData[3].elements
+            },
+            { 
+                name: 'LED 照明', 
+                value: 14,
+                params: civilData[0].params,
+                elements: civilData[0].elements
+            },
+            { 
+                name: '手机屏幕', 
+                value: 9,
+                params: civilData[1].params,
+                elements: civilData[1].elements
+            },
+            { 
+                name: '新能源汽车', 
+                value: 33,
+                params: civilData[2].params,
+                elements: civilData[2].elements
+            },
+            { 
+                name: '风力发电机', 
+                value: 23,
+                params: civilData[3].params,
+                elements: civilData[3].elements
+            }
+        ];
+
+        // 国防柱状图
+        const militaryChart = echarts.init(document.getElementById('militaryChart'));
+        militaryChart.setOption({
+            backgroundColor: 'transparent',
+            color: ["#dd6b66"],
+            title: {
+                text: '国防领域 - 单台/套用量(kg)',
+                left: 'center',
+                textStyle: { color: '#fff', fontWeight: 'normal', fontSize: 16 }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                textStyle: { color: '#fff' },
+                formatter: function(params) {
+                    const data = params.data;
+                    return `${data.product}<br/>
+                            核心元素: ${data.elements}<br/>
+                            用量范围: ${data.usage.join('-')} kg<br/>
+                            技术参数: ${data.params}`;
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                top: '15%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                axisLabel: { 
+                    color: '#ccc',
+                    fontSize: 12
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: militaryData.map(d => d.product),
+                axisLabel: { 
+                    color: '#ccc',
+                    fontSize: 12,
+                    rotate: 0,
+                    interval: 0
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            series: [{
+                type: 'bar',
+                data: militaryData.map(d => ({
+                    value: d.usage[1],
+                    product: d.product,
+                    elements: d.elements,
+                    usage: d.usage,
+                    params: d.params
+                })),
+                itemStyle: { color: '#dd6b66' },
+                label: {
+                    show: true,
+                    position: 'right',
+                    formatter: '{c} kg',
+                    color: '#fff',
+                    fontSize: 12
+                }
+            }]
+        });
+
+        // 民用柱状图
+        const civilChart = echarts.init(document.getElementById('civilChart'));
+        civilChart.setOption({
+            backgroundColor: 'transparent',
+            color: ["#759aa0"],
+            title: {
+                text: '民用领域 - 单台/套用量',
+                left: 'center',
+                textStyle: { color: '#fff', fontWeight: 'normal', fontSize: 16 }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                textStyle: { color: '#fff' },
+                formatter: function(params) {
+                    const data = params.data;
+                    return `${data.product}<br/>
+                            核心元素: ${data.elements}<br/>
+                            用量范围: ${data.usage.join('-')} ${data.usage[1] > 1 ? 'kg' : 'g'}<br/>
+                            技术参数: ${data.params}`;
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                top: '15%',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                axisLabel: { 
+                    color: '#ccc',
+                    fontSize: 12
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            yAxis: {
+                type: 'category',
+                data: civilData.map(d => d.product),
+                axisLabel: { 
+                    color: '#ccc',
+                    fontSize: 12,
+                    rotate: 0,
+                    interval: 0
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    }
+                }
+            },
+            series: [{
+                type: 'bar',
+                data: civilData.map(d => ({
+                    value: d.usage[1],
+                    product: d.product,
+                    elements: d.elements,
+                    usage: d.usage,
+                    params: d.params
+                })),
+                itemStyle: { color: '#759aa0' },
+                label: {
+                    show: true,
+                    position: 'right',
+                    formatter: function(params) {
+                        return params.value > 1 ? params.value + ' kg' : (params.value * 1000) + ' g';
+                    },
+                    color: '#fff',
+                    fontSize: 12
+                }
+            }]
+        });
+
+        // 饼图
+        const pieChart = echarts.init(document.getElementById('pieChart'));
+        pieChart.setOption({
+            backgroundColor: 'transparent',
+            color: ["#dd6b66", "#e69d87", "#ea7e53", "#f49f42", "#759aa0", "#8dc1a9", "#73a373", "#73b9bc"],
+            title: {
+                text: '全球年消费量占比(%)',
+                left: 'center',
+                textStyle: { color: '#fff', fontWeight: 'normal', fontSize: 16 }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                textStyle: { color: '#fff' },
+                formatter: function(params) {
+                    return `${params.name}<br/>
+                            占比: ${params.percent}%<br/>
+                            核心元素: ${params.data.elements}<br/>
+                            技术参数: ${params.data.params}`;
+                }
+            },
+            series: [{
+                type: 'pie',
+                radius: ['30%', '70%'],
+                center: ['50%', '50%'],
+                data: pieData,
+                label: {
+                    color: '#fff',
+                    formatter: '{b}: {d}%',
+                    fontSize: 12
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }],
+            legend: {
+                orient: 'horizontal',
+                bottom: '5%',
+                textStyle: { color: '#ccc', fontSize: 12 },
+                data: pieData.map(item => item.name),
+                pageButtonItemGap: 5,
+                pageButtonTextStyle: { color: '#ccc' },
+                pageIconColor: '#ccc',
+                pageIconInactiveColor: '#666'
+            }
+        });
+
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            militaryChart.resize();
+            civilChart.resize();
+            pieChart.resize();
+        });
+    </script>
+</body>
+</html>
+    
