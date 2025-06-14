@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>稀土价格综合指数</title>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2c2c2c 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 1400px;
+            width: 100%;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 70vh;
+            background: rgba(51, 51, 51, 1);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            padding: 15px;
+        }
+        
+        #main {
+            width: 100%;
+            height: 100%;
+        }
+        
+        @media (max-width: 768px) {
+            .chart-container {
+                height: 50vh;
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .chart-container {
+                height: 40vh;
+            }
+            
+            h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>稀土价格综合指数</h1>
+        </header>
+        
+        <div class="chart-container">
+            <div id="main"></div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化ECharts实例
+        var chartDom = document.getElementById('main');
+        var myChart = echarts.init(chartDom);
+        
+        // 原始数据（稀土行业模拟数据）
+        const rawData = [
+            ['2024/12/31', 184.2, 182.5, 185.8, 181.3],
+            ['2024/12/30', 183.7, 182.8, 185.2, 181.5],
+            ['2024/12/29', 182.3, 180.5, 183.8, 179.2],
+            ['2024/12/28', 179.8, 178.2, 182.5, 177.6],
+            ['2024/12/27', 178.5, 180.1, 181.3, 176.8],
+            ['2024/12/26', 181.2, 183.5, 184.8, 179.4],
+            ['2024/12/25', 184.6, 182.7, 186.3, 181.2],
+            ['2024/12/24', 182.3, 180.5, 183.8, 179.2],
+            ['2024/12/23', 179.8, 178.2, 182.5, 177.6],
+            ['2024/12/22', 178.5, 180.1, 181.3, 176.8],
+            ['2024/12/21', 181.2, 183.5, 184.8, 179.4],
+            ['2024/12/20', 184.6, 182.7, 186.3, 181.2],
+            ['2024/12/19', 182.3, 180.5, 183.8, 179.2],
+            ['2024/12/18', 179.8, 178.2, 182.5, 177.6],
+            ['2024/12/17', 178.5, 180.1, 181.3, 176.8],
+            ['2024/12/16', 181.2, 183.5, 184.8, 179.4],
+            ['2024/12/15', 184.6, 182.7, 186.3, 181.2],
+            ['2024/12/14', 182.3, 185.5, 187.2, 180.8],
+            ['2024/12/13', 185.7, 183.2, 186.8, 182.1],
+            ['2024/12/12', 183.5, 181.8, 184.3, 180.2],
+            ['2024/12/11', 181.2, 179.6, 182.7, 178.4],
+            ['2024/12/10', 179.8, 181.5, 183.2, 178.9],
+            ['2024/12/9', 182.3, 184.1, 185.5, 180.7],
+            ['2024/12/8', 184.6, 182.8, 186.3, 181.2],
+            ['2024/12/7', 182.3, 180.5, 183.8, 179.2],
+            ['2024/12/6', 179.8, 178.2, 182.5, 177.6],
+            ['2024/12/5', 178.5, 180.1, 181.3, 176.8],
+            ['2024/12/4', 181.2, 183.5, 184.8, 179.4],
+            ['2024/12/3', 184.6, 182.7, 186.3, 181.2],
+            ['2024/12/2', 182.3, 185.5, 187.2, 180.8],
+            ['2024/12/1', 185.7, 183.2, 186.8, 182.1],
+            ['2024/11/30', 183.5, 181.8, 184.3, 180.2],
+            ['2024/11/29', 181.2, 179.6, 182.7, 178.4],
+            ['2024/11/28', 179.8, 181.5, 183.2, 178.9],
+            ['2024/11/27', 182.3, 184.1, 185.5, 180.7],
+            ['2024/11/26', 184.6, 182.8, 186.3, 181.2],
+            ['2024/11/25', 182.3, 180.5, 183.8, 179.2],
+            ['2024/11/24', 179.8, 178.2, 182.5, 177.6],
+            ['2024/11/23', 178.5, 180.1, 181.3, 176.8],
+            ['2024/11/22', 181.2, 183.5, 184.8, 179.4],
+            ['2024/11/21', 184.6, 182.7, 186.3, 181.2],
+            ['2024/11/20', 182.3, 185.5, 187.2, 180.8],
+            ['2024/11/19', 185.7, 183.2, 186.8, 182.1],
+            ['2024/11/18', 183.5, 181.8, 184.3, 180.2],
+            ['2024/11/17', 181.2, 179.6, 182.7, 178.4],
+            ['2024/11/16', 179.8, 181.5, 183.2, 178.9],
+            ['2024/11/15', 182.3, 184.1, 185.5, 180.7],
+            ['2024/11/14', 184.6, 182.8, 186.3, 181.2],
+            ['2024/11/13', 182.3, 180.5, 183.8, 179.2],
+            ['2024/11/12', 179.8, 178.2, 182.5, 177.6],
+            ['2024/11/11', 178.5, 180.1, 181.3, 176.8],
+            ['2024/11/10', 181.2, 183.5, 184.8, 179.4],
+            ['2024/11/9', 184.6, 182.7, 186.3, 181.2],
+            ['2024/11/8', 182.3, 185.5, 187.2, 180.8],
+            ['2024/11/7', 185.7, 183.2, 186.8, 182.1],
+            ['2024/11/6', 183.5, 181.8, 184.3, 180.2],
+            ['2024/11/5', 181.2, 179.6, 182.7, 178.4],
+            ['2024/11/4', 179.8, 181.5, 183.2, 178.9],
+            ['2024/11/3', 182.3, 184.1, 185.5, 180.7],
+            ['2024/11/2', 184.6, 182.8, 186.3, 181.2],
+            ['2024/11/1', 182.3, 180.5, 183.8, 179.2]
+        ].reverse();
+        
+        // 计算移动平均线
+        function calculateMA(dayCount, data) {
+            var result = [];
+            for (var i = 0, len = data.length; i < len; i++) {
+                if (i < dayCount) {
+                    result.push('-');
+                    continue;
+                }
+                var sum = 0;
+                for (var j = 0; j < dayCount; j++) {
+                    sum += data[i - j][1];
+                }
+                result.push(+(sum / dayCount).toFixed(2));
+            }
+            return result;
+        }
+        
+        const dates = rawData.map(function (item) {
+            return item[0];
+        });
+        
+        const data = rawData.map(function (item) {
+            return [item[1], item[2], item[3], item[4]];
+        });
+        
+        // 配置项
+        var option = {
+            backgroundColor: "rgba(51,51,51,1)",
+            title: {
+                text: '', // 删除了橘黄色的稀土价格综合指数
+                left: 'center',
+                textStyle: {
+                    color: '#e69d87',
+                    fontSize: 22,
+                    fontWeight: 'bold'
+                }
+            },
+            legend: {
+                data: ['日K', 'MA5', 'MA10', 'MA20', 'MA30'],
+                inactiveColor: '#777',
+                textStyle: {
+                    color: '#eee'
+                },
+                top: 10
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    animation: false,
+                    type: 'cross',
+                    lineStyle: {
+                        color: '#759aa0',
+                        width: 2,
+                        opacity: 1
+                    }
+                },
+                backgroundColor: 'rgba(40,40,40,0.9)',
+                borderColor: '#555',
+                textStyle: {
+                    color: '#fff'
+                }
+            },
+            xAxis: {
+                type: 'category',
+                data: dates,
+                axisLine: { 
+                    lineStyle: { 
+                        color: '#759aa0' 
+                    } 
+                },
+                axisLabel: {
+                    color: '#a0a0a0'
+                }
+            },
+            yAxis: {
+                scale: true,
+                axisLine: { 
+                    lineStyle: { 
+                        color: '#759aa0' 
+                    } 
+                },
+                axisLabel: {
+                    color: '#a0a0a0'
+                },
+                splitLine: { 
+                    lineStyle: {
+                        color: 'rgba(90,90,90,0.5)',
+                        type: 'dashed'
+                    }
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '3%',
+                bottom: '15%',
+                top: '15%'
+            },
+            dataZoom: [
+                {
+                    type: 'inside',
+                    start: 50,
+                    end: 100
+                },
+                {
+                    show: true,
+                    type: 'slider',
+                    top: '90%',
+                    start: 50,
+                    end: 100,
+                    handleSize: '80%',
+                    handleStyle: {
+                        color: '#8dc1a9'
+                    },
+                    textStyle: {
+                        color: '#8392A5'
+                    },
+                    dataBackground: {
+                        areaStyle: {
+                            color: '#8392A5'
+                        },
+                        lineStyle: {
+                            opacity: 0.8,
+                            color: '#8392A5'
+                        }
+                    },
+                    fillerColor: 'rgba(117,154,160,0.3)',
+                    borderColor: '#555'
+                }
+            ],
+            series: [
+                {
+                    type: 'candlestick',
+                    name: '日K',
+                    data: data,
+                    itemStyle: {
+                        color: '#dd6b66',
+                        color0: '#8dc1a9',
+                        borderColor: '#dd6b66',
+                        borderColor0: '#8dc1a9',
+                        borderWidth: 1
+                    }
+                },
+                {
+                    name: 'MA5',
+                    type: 'line',
+                    data: calculateMA(5, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 2,
+                        color: '#759aa0'
+                    }
+                },
+                {
+                    name: 'MA10',
+                    type: 'line',
+                    data: calculateMA(10, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 2,
+                        color: '#e69d87'
+                    }
+                },
+                {
+                    name: 'MA20',
+                    type: 'line',
+                    data: calculateMA(20, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 2,
+                        color: '#ea7e53'
+                    }
+                },
+                {
+                    name: 'MA30',
+                    type: 'line',
+                    data: calculateMA(30, data),
+                    smooth: true,
+                    showSymbol: false,
+                    lineStyle: {
+                        width: 2,
+                        color: '#eedd78'
+                    }
+                }
+            ]
+        };
+        
+        // 应用配置
+        option && myChart.setOption(option);
+        
+        // 响应式调整
+        window.addEventListener('resize', function() {
+            myChart.resize();
+        });
+    </script>
+</body>
+</html>
+    
