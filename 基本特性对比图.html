@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+</head>
+<body style="height: 100%; margin: 0">
+    <div id="main" style="width: 100%; height: 100%"></div>
+    <script type="text/javascript">
+    var chartDom = document.getElementById('main');
+    var myChart = echarts.init(chartDom);
+    
+    var colors = ["#dd6b66", "#759aa0", "#e69d87", "#8dc1a9", "#ea7e53", "#eedd78", 
+                 "#73a373", "#73b9bc", "#7289ab", "#91ca8c", "#f49f42"];
+    
+    var option = {
+        backgroundColor: "rgba(51,51,51,1)",
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: { type: 'shadow' },
+            formatter: function(params) {
+                return params[0].name + '<br>' + 
+                       params.map(item => 
+                           `${item.seriesName}: ${item.value}${getUnit(item.seriesName)}`
+                       ).join('<br>');
+            }
+        },
+        legend: {
+            textStyle: { color: '#fff' }
+        },
+        grid: {
+            left: '12%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            axisLabel: { color: '#fff' }
+        },
+        yAxis: {
+            type: 'category',
+            data: ['钪（Sc）','钇（Y）','镧（La）','铈（Ce）','镨（Pr）','钕（Nd）',
+                  '钷（Pm）','钐（Sm）','铕（Eu）','钆（Gd）','铽（Tb）','镝（Dy）',
+                  '钬（Ho）','铒（Er）','铥（Tm）','镱（Yb）','镥（Lu）'],
+            axisLabel: { color: '#fff' }
+        },
+        series: [
+            {
+                name: '导电性（10^6 S/m）',
+                type: 'bar',
+                stack: 'total',
+                itemStyle: { color: colors[0] },
+                label: { show: true, color: '#fff' },
+                data: [2.60,1.76,1.77,1.15,0.68,0.66,0.50,0.22,0.17,0.86,0.84,0.77,0.60,0.57,0.54,2.02,1.66]
+            },
+            {
+                name: '磁性（居里温度/K*10^2）',
+                type: 'bar',
+                stack: 'total',
+                itemStyle: { color: colors[1] },
+                label: { show: true, color: '#fff' },
+                data: [0,0,0,0,0.20,3.20,0.92,1.48,0.95,2.93,2.19,0.85,0.20,0.19,0.32,0,0]
+            },
+            {
+                name: '耐腐蚀性（酸性环境评分）',
+                type: 'bar',
+                stack: 'total',
+                itemStyle: { color: colors[2] },
+                label: { show: true, color: '#fff' },
+                data: [4,4,2,2,2,2,2,2,1,3,3,3,3,3,3,3,4]
+            }
+        ]
+    };
+
+    function getUnit(seriesName) {
+        if(seriesName.includes('导电性')) return '×10⁶ S/m';
+        if(seriesName.includes('磁性')) return 'K';
+        if(seriesName.includes('耐腐蚀性')) return '分';
+        return '';
+    }
+
+    myChart.setOption(option);
+    </script>
+</body>
+</html>
+    
